@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>课程销售分析工具</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background-color: #000000;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+            color: #ffffff;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 600;
+            background: linear-gradient(180deg, #fff 0%, #dfdfdf 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 40px;
+        }
+
+        .input-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        input {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 10px;
+            padding: 15px 20px;
+            font-size: 16px;
+            color: #ffffff;
+            width: 300px;
+            backdrop-filter: blur(10px);
+            margin-right: 10px;
+        }
+
+        button {
+            background: #0A84FF;
+            border: none;
+            border-radius: 10px;
+            padding: 15px 30px;
+            font-size: 16px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #0071E3;
+        }
+
+        .results {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .table-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            color: #ffffff;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            font-weight: 600;
+            color: #0A84FF;
+        }
+
+        .notes {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .notes h3 {
+            color: #0A84FF;
+            margin-top: 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .error {
+            color: #FF453A;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>课程销售分析工具</h1>
+        
+        <div class="input-section">
+            <input type="number" id="targetRevenue" placeholder="请输入月度营收目标（元）">
+            <button onclick="analyzeRevenue()">开始分析</button>
+            <div class="error" id="error">请输入有效的营收目标</div>
+        </div>
+
+        <div class="results" id="results">
+            <div class="table-container">
+                <h2>定价方案分析</h2>
+                <table id="pricingTable">
+                    <thead>
+                        <tr>
+                            <th>课程定价</th>
+                            <th>所需销量(人)</th>
+                            <th>日均销量(人)</th>
+                            <th>预期毛收入</th>
+                            <th>预期净利润</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="table-container">
+                <h2>直播场次分析</h2>
+                <table id="liveTable">
+                    <thead>
+                        <tr>
+                            <th>课程定价</th>
+                            <th>每场直播人数</th>
+                            <th>每场直播营收</th>
+                            <th>转化率要求</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="table-container">
+                <h2>建议方案</h2>
+                <table id="recommendationTable">
+                    <thead>
+                        <tr>
+                            <th>指标</th>
+                            <th>目标值</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="notes">
+                <h3>注意事项</h3>
+                <ul>
+                    <li>以上分析基于每月12场直播计算</li>
+                    <li>建议通过社群营销、会员裂变等方式辅助获客</li>
+                    <li>可以考虑设置阶段性优惠价格刺激销量</li>
+                    <li>建议设立销售激励机制提高团队积极性</li>
+                    <li>转化率基于每场直播500人观看计算</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function formatNumber(num) {
+            return new Intl.NumberFormat('zh-CN').format(num.toFixed(2));
+        }
+
+        function analyzeRevenue() {
+            const targetRevenue = parseFloat(document.getElementById('targetRevenue').value);
+            if (!targetRevenue || targetRevenue <= 0) {
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('results').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+
+            const profitRate = 0.8;
+            const priceOptions = [1999, 2999, 3999, 4999];
+            const monthlyLives = 12;
+
+            // 定价方案分析
+            let pricingHtml = '';
+            priceOptions.forEach(price => {
+                const salesNeeded = targetRevenue / price;
+                const dailySales = salesNeeded / 22;
+                const grossIncome = price * salesNeeded;
+                const netIncome = grossIncome * profitRate;
+
+                pricingHtml += `
+                    <tr>
+                        <td>${formatNumber(price)}元</td>
+                        <td>${Math.round(salesNeeded)}</td>
+                        <td>${dailySales.toFixed(1)}</td>
+                        <td>${formatNumber(grossIncome)}元</td>
+                        <td>${formatNumber(netIncome)}元</td>
+                    </tr>
+                `;
+            });
+            document.querySelector('#pricingTable tbody').innerHTML = pricingHtml;
+
+            // 直播场次分析
+            let liveHtml = '';
+            priceOptions.forEach(price => {
+                const salesPerLive = (targetRevenue / price) / monthlyLives;
+                const revenuePerLive = salesPerLive * price;
+                const conversionRate = (salesPerLive / 500) * 100;
+
+                liveHtml += `
+                    <tr>
+                        <td>${formatNumber(price)}元</td>
+                        <td>${salesPerLive.toFixed(1)}人</td>
+                        <td>${formatNumber(revenuePerLive)}元</td>
+                        <td>${conversionRate.toFixed(1)}%</td>
+                    </tr>
+                `;
+            });
+            document.querySelector('#liveTable tbody').innerHTML = liveHtml;
+
+            // 建议方案
+            const recommendedPrice = 2999;
+            const monthlySales = targetRevenue / recommendedPrice;
+            const avgLiveSales = monthlySales / monthlyLives;
+
+            const recommendationHtml = `
+                <tr><td>月度总销量</td><td>${Math.round(monthlySales)}人</td><td>整月销售目标</td></tr>
+                <tr><td>每场直播目标</td><td>${avgLiveSales.toFixed(1)}人</td><td>基于每月${monthlyLives}场直播</td></tr>
+                <tr><td>场均销售额</td><td>${formatNumber(avgLiveSales * recommendedPrice)}元</td><td>每场直播营收目标</td></tr>
+                <tr><td>月度毛收入</td><td>${formatNumber(targetRevenue)}元</td><td>预期总营收</td></tr>
+                <tr><td>月度净利润</td><td>${formatNumber(targetRevenue * profitRate)}元</td><td>按${profitRate*100}%利润率</td></tr>
+            `;
+            document.querySelector('#recommendationTable tbody').innerHTML = recommendationHtml;
+        }
+    </script>
+</body>
+</html> 
