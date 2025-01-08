@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>待办事项清单</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+</head>
+<body>
+    <div class="container">
+        <h1>待办事项清单</h1>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-label">总任务</span>
+                <span class="stat-value" id="totalTasks">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">已完成</span>
+                <span class="stat-value" id="completedTasks">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">待完成</span>
+                <span class="stat-value" id="pendingTasks">0</span>
+            </div>
+        </div>
+
+        <div class="add-todo">
+            <input type="text" id="newTodo" placeholder="输入新的待办事项...">
+            <button onclick="addTodo()" class="primary-btn">添加</button>
+        </div>
+
+        <div class="filters">
+            <button onclick="filterTodos('all')" class="filter-btn active" id="allFilter">全部</button>
+            <button onclick="filterTodos('pending')" class="filter-btn" id="pendingFilter">待完成</button>
+            <button onclick="filterTodos('completed')" class="filter-btn" id="completedFilter">已完成</button>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="搜索待办事项..." oninput="searchTodos()">
+        </div>
+
+        <div class="todo-list" id="todoList">
+            <!-- 待办事项将通过 JavaScript 动态添加 -->
+        </div>
+
+        <div class="signature">兮雅作品</div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html> 
